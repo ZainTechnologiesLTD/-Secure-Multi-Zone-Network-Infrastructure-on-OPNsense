@@ -43,7 +43,28 @@ This configuration provides:
 
 ## 🧱 Network Diagram (Mermaid)
 
-```mermaid
+flowchart TD
+    Internet[Internet / WAN]
+    LAN[LAN Zone\n(Internal Systems)]
+    DMZ[DMZ Zone\n(Public Servers)]
+    VPN[VPN Zone\n(Remote Clients)]
+
+    subgraph FW["OPNsense Firewall"]
+        DNS[Unbound DNS Resolver]
+        HAP[HAProxy Reverse Proxy]
+        OVPN[OpenVPN Server (Split-Tunnel)]
+        LE[Let's Encrypt SSL]
+    end
+
+    Internet -->|HTTPS 443| HAP
+    Internet -->|UDP 1194| OVPN
+
+    HAP --> DMZ
+    OVPN --> LAN
+    OVPN --> DMZ
+
+    LAN --> DNS
+    DNS --> Internet
 flowchart TD
 A[Internet] -->|443/1194| B[OPNsense Firewall]
 B -->|LAN 10.0.10.0/24| C[Internal Network (AD, File, Apps)]
